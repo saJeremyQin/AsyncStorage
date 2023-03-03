@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Text, StyleSheet, View, Image } from "react-native";
+import { Text, StyleSheet, View, Image, Alert } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import JereButton from "../utils/JereButton";
@@ -9,11 +9,16 @@ const Login = ({navigation}) => {
     const [name, setName] = useState('');
 
     const setData = async() => {
-        try {
-            await AsyncStorage.setItem("userName", name);
-            navigation.navigate('Home');       
-        } catch (error) {
-            console.log(error);       
+        // console.log("the name is", name);
+        if(name.length <= 2)
+            Alert.alert("Warning!", "The name of length is too short!")
+        else {
+            try {
+                await AsyncStorage.setItem("userName", name);
+                navigation.navigate('Home');                      
+            } catch (error) {
+                console.log(error);       
+            }
         }
     }
 
