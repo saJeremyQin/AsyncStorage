@@ -7,14 +7,38 @@ import JereButton from "../utils/JereButton";
 
 const Login = ({navigation}) => {
     const [name, setName] = useState('');
+    const [age, setAge] = useState('');
+
+    useEffect(() => {
+        getData();
+    },[]);
+
+    const getData = async() => {
+        try {
+            await AsyncStorage.getItem("userData").then(
+                value => {
+                    if(value != null)
+                        navigation.navigate("Home")
+                }
+            )
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const setData = async() => {
         // console.log("the name is", name);
-        if(name.length <= 2)
-            Alert.alert("Warning!", "The name of length is too short!")
+        if(name.length <= 2 || age.length == 0)
+            Alert.alert("Warning!", "The length of data is too short!")
         else {
             try {
-                await AsyncStorage.setItem("userName", name);
+                let user = {
+                    Name: name,
+                    Age: age                 
+                }
+                // convert an object to a string, JSON.Stringfy
+                console.log("user is", user);
+                await AsyncStorage.setItem("userData", JSON.stringify(user));
                 navigation.navigate('Home');                      
             } catch (error) {
                 console.log(error);       
@@ -28,7 +52,12 @@ const Login = ({navigation}) => {
             <Text style={styles.text}>Async Storage</Text>
             <TextInput
                 onChangeText={(value) => setName(value)}
-                placeholder="Please input your name"
+                placeholder="Enter your name"
+                style={styles.input}
+            />
+            <TextInput
+                onChangeText={(value) => setAge(value)}
+                placeholder="Enter your age"
                 style={styles.input}
             />
             <JereButton 
@@ -59,7 +88,7 @@ const styles = StyleSheet.create({
         borderColor:"#887",
         borderWidth:1,
         borderRadius:10,
-        marginTop:100,
+        marginTop:30,
         textAlign:"center",
         fontSize:20
     },
