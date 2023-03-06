@@ -1,9 +1,10 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState } from "react";
 import { useEffect } from "react";
 import { View, Text, StyleSheet, Alert } from 'react-native';
 import { TextInput } from "react-native-gesture-handler";
 import JereButton from "../utils/JereButton";
+import { db } from "../utils/db";
 
 const Home = ({navigation}) => {
     const [name, setName] = useState('');
@@ -15,15 +16,37 @@ const Home = ({navigation}) => {
 
     const getData = async() => {
         try {
-            await AsyncStorage.getItem("userData").then(
-                value => {
-                    if(value != null) {
-                        let user = JSON.parse(value);
-                        setName(user.Name);
-                        setAge(user.Age);
-                    }        
-                }
-            )
+            // await AsyncStorage.getItem("userData").then(
+            //     value => {
+            //         if(value != null) {
+            //             let user = JSON.parse(value);
+            //             setName(user.Name);
+            //             setAge(user.Age);
+            //         }        
+            //     }
+            // )
+            await db.transaction(async (tx) => {
+                await tx.executeSql(
+                    "SELECT Name,Age FROM Users",
+                    [],
+                    (tx, results) => {
+                        let len = results.rows._array.length;
+                        // console.log("The len in home is",len);
+                        if(len > 0) {
+                            let uName = results.rows._array[0].Name;
+                            let uAge = results.rows._array[0].Age;  
+        
+                            setName(uName);
+                            setAge(uAge);
+                        }
+                    },
+                    (tx, error) => {
+                        console.log('Transaction error');
+                        console.log(error);
+                    }
+
+                );
+            })
         }
 
         catch (error) {
@@ -33,17 +56,30 @@ const Home = ({navigation}) => {
 
 
     const updateData = async() => {
-        // console.log("the name is", name);
         if(name.length <= 2 || age.length ==0)
             Alert.alert("Warning!", "The length of data is incorrect!")
         else {
             try {
-                let user = {
-                    Name: name,
-                }
-                await AsyncStorage.mergeItem("userData", JSON.stringify(user));
+                // let user = {
+                //     Name: name,
+                // }
+                // await AsyncStorage.mergeItem("userData", JSON.stringify(user));
+                db.transaction((tx) => {
+                    tx.executeSql(
+                        "UPDATE Users SET Name=?",
+                        [name],
+                        (tx, res) => {
+                            console.log('Transaction successful');
+                            console.log(res);
+                        },
+                        (tx, error) => {
+                            console.log('Transaction error');
+                            console.log(error);
+                        }
+                    );
+
+                });
                 Alert.alert("Success!", "Your name has been updated.");
-                // navigation.navigate('Home');                      
             } catch (error) {
                 console.log(error);       
             }
@@ -52,10 +88,24 @@ const Home = ({navigation}) => {
 
     const removeData = async() => {
         try {
-            AsyncStorage.clear().then(
-                navigation.navigate("Login")
-            )
-    
+            // AsyncStorage.clear().then(
+            //     navigation.navigate("Login")
+            // )
+            await db.transaction(async (tx) => {
+                await tx.executeSql(
+                    "delete from Users", 
+                    [],
+                    (tx, res) => {
+                        console.log('Transaction successful');
+                        console.log(res);
+                    },
+                    (tx, error) => {
+                        console.log('Transaction error');
+                        console.log(error);
+                    }
+                );
+            })
+            navigation.navigate("Login")
         } catch (error) {
             console.log(error);        
         }
