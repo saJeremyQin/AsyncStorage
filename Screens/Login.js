@@ -4,11 +4,15 @@ import { TextInput } from "react-native-gesture-handler";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 import { db } from "../utils/db";
 import JereButton from "../utils/JereButton";
+import { useSelector, useDispatch } from "react-redux";
+import { setAge, setName } from "../redux/action";
 
 
 const Login = ({navigation}) => {
-    const [name, setName] = useState('');
-    const [age, setAge] = useState('');
+    // const [name, setName] = useState('');
+    // const [age, setAge] = useState('');
+    const {name, age} = useSelector(state => state.userReducer);
+    const dispatch = useDispatch();
 
     useEffect(() => {
         createTable();
@@ -55,6 +59,8 @@ const Login = ({navigation}) => {
             Alert.alert("Warning!", "The length of data is incorrect!")
         else {
             try {
+                dispatch(setName(name));
+                dispatch(setAge(age));
                 // let user = {
                 //     Name: name,
                 //     Age: age                 
@@ -64,7 +70,7 @@ const Login = ({navigation}) => {
                 // await AsyncStorage.setItem("userData", JSON.stringify(user));
 
                 await db.transaction(async (tx) => { 
-                    console.log("The name is", name);                
+                    // console.log("The name is", name);                
                     await tx.executeSql(
                         "INSERT INTO Users (Name, Age) VALUES (?,?)",
                         [name,age],
@@ -88,15 +94,15 @@ const Login = ({navigation}) => {
 
     return (
         <View style={styles.body}>
-            <Image source={require("../assets/asyncstorage.png")} style={styles.logo}/>
-            <Text style={styles.text}>Async Storage</Text>
+            <Image source={require("../assets/redux.png")} style={styles.logo}/>
+            <Text style={styles.text}>Redux</Text>
             <TextInput
-                onChangeText={(value) => setName(value)}
+                onChangeText={(value) => dispatch(setName(value))}
                 placeholder="Enter your name"
                 style={styles.input}
             />
             <TextInput
-                onChangeText={(value) => setAge(value)}
+                onChangeText={(value) => dispatch(setAge(value))}
                 placeholder="Enter your age"
                 style={styles.input}
             />

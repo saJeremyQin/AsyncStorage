@@ -5,10 +5,14 @@ import { View, Text, StyleSheet, Alert } from 'react-native';
 import { TextInput } from "react-native-gesture-handler";
 import JereButton from "../utils/JereButton";
 import { db } from "../utils/db";
+import { useDispatch, useSelector } from "react-redux";
+import { setAge, setName } from "../redux/action";
 
 const Home = ({navigation}) => {
-    const [name, setName] = useState('');
-    const [age, setAge] = useState('');
+    // const [name, setName] = useState('');
+    // const [age, setAge] = useState('');
+    const {name, age} = useSelector(state => state.userReducer);
+    const dispatch = useDispatch();
 
     useEffect(() => {
         getData();
@@ -36,8 +40,8 @@ const Home = ({navigation}) => {
                             let uName = results.rows._array[0].Name;
                             let uAge = results.rows._array[0].Age;  
         
-                            setName(uName);
-                            setAge(uAge);
+                            dispatch(setName(uName));
+                            dispatch(setAge(uAge));
                         }
                     },
                     (tx, error) => {
@@ -64,6 +68,7 @@ const Home = ({navigation}) => {
                 //     Name: name,
                 // }
                 // await AsyncStorage.mergeItem("userData", JSON.stringify(user));
+                dispatch(setName(name));
                 db.transaction((tx) => {
                     tx.executeSql(
                         "UPDATE Users SET Name=?",
@@ -120,7 +125,7 @@ const Home = ({navigation}) => {
                 Your age is {age}
             </Text>        
             <TextInput
-                onChangeText={(value) => setName(value)}
+                onChangeText={(value) => dispatch(setName(value))}
                 placeholder="Enter your name"
                 style={styles.input}
                 value={name}
