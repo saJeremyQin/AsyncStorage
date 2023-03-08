@@ -102,7 +102,7 @@ const Login = ({navigation}) => {
                 style={styles.input}
             />
             <TextInput
-                onChangeText={(value) => dispatch(setAge(value))}
+                onChangeText={(value) => dispatch(setAge(parseInt(value)))}
                 placeholder="Enter your age"
                 style={styles.input}
             />
